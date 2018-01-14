@@ -1,146 +1,293 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 import time
 import requests
 import logging
 from pyquery import PyQuery as pq
+from requests_toolbelt.multipart.encoder import MultipartEncoder
+from pprint import pprint
+from collections import OrderedDict
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('mti.py')
 
-
 ID = '2331'
 D_ID = '2777'
-TEST_QUESTIONS = {}
 
-LOGIN_URL = "https://lms.mti.edu.ru/local/login.php"
-DISCIPLINE_URL = (
-    'https://lms.mti.edu.ru/course/view.php?'
-    'id={ID}&disciplineid={D_ID}')
+LOGIN_URL = 'https://lms.mti.edu.ru/local/login.php'
+DISCIPLINE_URL = \
+    'https://lms.mti.edu.ru/course/view.php?id={ID}&disciplineid={D_ID}'
 ATTEMPTS_URL = 'https://lms.mti.edu.ru/mod/quiz/view.php'
 START_URL = 'https://lms.mti.edu.ru/mod/quiz/startattempt.php'
+POST_ANSWERS_URL = 'https://lms.mti.edu.ru/mod/quiz/processattempt.php'
 
 
-def get_session():
-    s = requests.Session()
+LOGIN = 'harumm.scarumm@gmail.com'
+PSWD = 'oscopes1'
 
-    r = s.post(LOGIN_URL, data={
-        "username": "harumm.scarumm@gmail.com",
-        "password": "oscopes1"
-    })
-    if r.status_code == requests.codes.ok:
-        logger.info("Auth ok")
-        return s
-    else:
-        logger.warn("Failed to auth, try in 10 secs...")
-        time.sleep(10)
-        return get_session()
+TEST_QUESTIONS = {}
 
 
-def main():
+class Prober:
 
-    # login
-    s = get_session()
-    r = s.get(DISCIPLINE_URL.format(ID=ID, D_ID=D_ID))
-    d = pq(r.text)
+    def __init__(self, questions=None):
+        self.session = None
+        if questions:
+            self.questions = questions
+        else:
+            self.questions = {}
 
-    # get the last accessible training
-    test_url = pq(d('a.training')[-2]).attr('href')
+    def get_session(self):
+        s = requests.Session()
+        s.headers.update(
+            {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36'})
 
-    # accept rules
-    r = s.get(test_url)
-    data = {}
-    for i in pq(pq(r.text)((
-            'div.singlebutton > form[method="post"] '
-            '> div > input[type="hidden"]'))):
-        p = pq(i)
-        data[p.attr("name")] = p.attr("value")
+        r = s.post(LOGIN_URL, data={'username': LOGIN,
+                                    'password': PSWD})
 
-    # start test
-    r = s.post(ATTEMPTS_URL, data)
+        while r.status_code != requests.codes.ok:
+            logger.error('Failed to auth, retry in 5 secs...')
+            time.sleep(5)
+            r = s.post(LOGIN_URL, data={'username': LOGIN,
+                                        'password': PSWD})
+        logger.info('Auth ok')
+        self.session = s
 
-    data = {}
-    for i in pq(r.text)('form[method="post"] > div > input[type="hidden"]'):
-        p = pq(i)
-        data[p.attr("name")] = p.attr("value")
+    def get_training_url(self):
+        r = self.session.get(DISCIPLINE_URL.format(ID=ID, D_ID=D_ID))
+        while r.status_code != requests.codes.ok:
+            logger.error('Failed to get discipline, retry in 5 secs...')
+            time.sleep(5)
+            r = self.session.get(DISCIPLINE_URL.format(ID=ID,
+                                                       D_ID=D_ID))
+        d = pq(r.text)
+        return pq(d('a.training')[-2]).attr('href')
 
-    r = s.post(START_URL, data)
+    def accept_rules(self, url):
+        r = self.session.get(url)
+        while r.status_code != requests.codes.ok:
+            logger.error('Failed to get training, retry in 5 secs...')
+            time.sleep(5)
+            r = self.session.get(url)
+        data = {}
+        for i in pq(pq(r.text)(
+                'div.singlebutton > form[method="post"] '
+                '> div > input[type="hidden"]')):
+            p = pq(i)
+            data[p.attr('name')] = p.attr('value')
+        return data
 
-    full_text = r.text
-    questions = pq(full_text)('div.que > div.content > div.formulation')
+    def start_attempt(self, args):
+        r = self.session.post(ATTEMPTS_URL, args)
+        while r.status_code != requests.codes.ok:
+            logger.error('Failed to start attempt, retry in 5 secs...')
+            time.sleep(5)
+            r = self.session.post(ATTEMPTS_URL, args)
 
-    for q in questions:
-        p = pq(q)
+        data = {}
+        for i in pq(r.text)(
+                'form[method="post"] > div > input[type="hidden"]'):
+            p = pq(i)
+            data[p.attr('name')] = p.attr('value')
+        return data
 
-        text = p('div.qtext').text()
-        if text not in TEST_QUESTIONS:
-            TEST_QUESTIONS[text] = {'result': None,
-                                    'answers': list(),
-                                    'iter': 1,
-                                    'multi': False}
+    def do_test(self, args):
+        r = self.session.post(START_URL, args)
+        while r.status_code != requests.codes.ok:
+            logger.error('Failed to start test, retry in 5 secs...')
+            time.sleep(5)
+            r = self.session.post(START_URL, args)
+
+        full_text = r.text
+        questions = \
+            pq(full_text)('div.que > div.content > div.formulation')
+
+        data = []
+        for q in questions:
+            p = pq(q)
+            sq_name = pq(p('h3+input[type="hidden"]')).attr('name')
+            sq_val = pq(p('h3+input[type="hidden"]')).attr('value')
+            name = sq_name.split('_')[0] + '_:flagged'
+            data += [(name, '0'), (name, '0'), (sq_name, sq_val)]
+
+            text = p('div.qtext').text()
+            if text not in self.questions:
+                self.questions[text] = {
+                    'result': None,
+                    'answers': list(),
+                    'iter': 1,
+                    'multi': False,
+                }
+                answers = p('div.answer > div')
+
+                for a in answers:
+                    pa = pq(a)
+                    a_text = pa('label').text()
+                    if pa('input').attr('type') != 'radio':
+                        self.questions[text]['multi'] = True
+                    self.questions[text]['answers'].append(a_text)
+
+            attempt = {}
+            if self.questions[text]['result']:
+                attempt = self.questions[text]['result']
+            else:
+                variant = bin(self.questions[text]['iter'])[2:].zfill(
+                    len(self.questions[text]['answers']))
+                for (index, item) in \
+                        enumerate(self.questions[text]['answers']):
+                    attempt[item] = variant[index]
             answers = p('div.answer > div')
 
             for a in answers:
                 pa = pq(a)
                 a_text = pa('label').text()
-                if pa('input').attr("type") == "radio":
-                    TEST_QUESTIONS[text].multi = False
-                TEST_QUESTIONS[text]['answers'].append(a_text)
+                i_name = pa('input[type!="hidden"]').attr('name')
+                if attempt[a_text] == '1':
+                    pa('input').attr('checked', 'true')
+                    data.append((i_name, '1'))
 
-        attempt = {}
-        if TEST_QUESTIONS[text]['result']:
-            attempt = TEST_QUESTIONS[text]['result']
-        else:
-            variant = (
-                bin(TEST_QUESTIONS[text]['iter'])[2:]).zfill(
-                len(TEST_QUESTIONS[text]['answers']))
-            for (index, item) in enumerate(TEST_QUESTIONS[text]['answers']):
-                attempt[item] = variant[index]
-        answers = p('div.answer > div')
+        hidden = pq(full_text)('form#responseform > div'
+                               ).children('input[type="hidden"]')
+        for h in hidden:
+            ph = pq(h)
+            data.append((ph.attr('name'), ph.attr('value')))
+        return data
 
-        for a in answers:
+    def post_answers(self, data):
+        mdata = MultipartEncoder(data)
 
-            pa = pq(a)
-            a_text = pa('label').text()
-            pa = pa('input').attr(
-                'checked', 'true' if attempt[a_text] == '1' else 'false')
-        if not TEST_QUESTIONS[text]['multi']:
-            TEST_QUESTIONS[text]['iter'] = TEST_QUESTIONS[text]['iter'] << 1
-        else:
-            TEST_QUESTIONS[text]['iter'] += 1
-            #
-            # begin test
-            # accept rules
-            # shuffle answers
+        headers = self.session.headers
+        headers.update({'Content-Type': mdata.content_type})
+        r = self.session.post(POST_ANSWERS_URL, data=mdata,
+                              headers=headers)
+        while r.status_code != requests.codes.ok:
+            logger.error('Failed to post answers, retry in 5 secs...')
+            time.sleep(5)
+            r = self.session.post(POST_ANSWERS_URL, data=mdata,
+                                  headers=headers)
+        args = []
+        ph = \
+            pq(r.text)('form[method="post"] > div > input[type="hidden"]'
+                       )
+        for p in ph:
+            h = pq(p)
+            args.append((h.attr('name'), h.attr('value')))
+        return args
 
-            # post answers
-            # check accuracy
+    def submit_answers(self, args):
+        args = OrderedDict(args)
+
+        a = {
+            'attempt': args['attempt'],
+            'finishattempt': '1',
+            'sesskey': args['sesskey'],
+            'timeup': '0',
+            'slots': '',
+        }
+        headers = self.session.headers
+        headers.update({
+            'Referer': (
+                'https://lms.mti.edu.ru/mod/quiz/attempt.php?attempt=%s' % (
+                    args['attempt']))
+        })
+
+        r = self.session.post(POST_ANSWERS_URL, params=a,
+                              headers=headers)
+        while r.status_code != requests.codes.ok:
+
+            logger.error('Failed to submit answers, retry in 5 secs...')
+            time.sleep(5)
+            r = self.session.post(POST_ANSWERS_URL, args,
+                                  headers=headers)
+        return
+
+    def get_result_table_url(self):
+        r = self.session.get(DISCIPLINE_URL.format(ID=ID, D_ID=D_ID))
+        while r.status_code != requests.codes.ok:
+            logger.error('Failed to get discipline, retry in 5 secs...')
+            time.sleep(5)
+            r = self.session.get(DISCIPLINE_URL.format(ID=ID,
+                                                       D_ID=D_ID))
+        d = pq(r.text)
+        return pq(d('a.training:last'))('a').attr('href')
+
+    def get_result_url(self, url):
+        r = self.session.get(url)
+        while r.status_code != requests.codes.ok:
+            logger.error('Failed to get table, retry in 5 secs...')
+            time.sleep(5)
+            r = self.session.get(url)
+        d = pq(r.text)
+        return pq(d('table.attempt_table tr:last td.lastcol a'
+                    )).attr('href')
+
+    def get_results(self, url):
+        r = self.session.get(url)
+        while r.status_code != requests.codes.ok:
+            logger.error('Failed to get results, retry in 5 secs...')
+            time.sleep(5)
+            r = self.session.get(url)
+        err_q = [pq(q).text() for q in
+                 pq(r.text)('ul.protocol_themelist_questions li')]
+
+        logger.debug("Errors: %s", err_q)
+        logger.debug(self.questions)
+        for q in self.questions:
+            if q in err_q:
+                if not self.questions[q]['multi']:
+                    self.questions[q]['iter'] = self.questions[q]['iter'] << 1
+                else:
+                    self.questions[q]['iter'] += 1
+
+                if len(self.questions[q]['answers']) < len(
+                        bin(self.questions[q]['iter'])[2:]):
+                    self.questions[q]['iter'] = 1
+            elif not self.questions[q]['result']:
+                attempt = {}
+                if self.questions[q]['result']:
+                    attempt = self.questions[q]['result']
+                else:
+                    variant = bin(self.questions[q]['iter'])[2:].zfill(
+                        len(self.questions[q]['answers']))
+                    for (index, item) in \
+                            enumerate(self.questions[q]['answers']):
+                        attempt[item] = variant[index]
+                self.questions[q]['result'] = attempt
+
+    def run(self):
+
+        first = True
+        while not (all([self.questions[q]['result'] is not None
+                        for q in self.questions]) and not first):
+            try:
+                if not first:
+                    time.sleep(150)
+                else:
+                    first = False
+
+                self.get_session()
+                training_url = self.get_training_url()
+                attempt_args = self.accept_rules(training_url)
+                start_args = self.start_attempt(attempt_args)
+                data = self.do_test(start_args)
+                args = self.post_answers(data)
+                self.submit_answers(args)
+                result_table_url = self.get_result_table_url()
+                result_url = self.get_result_url(result_table_url)
+                self.get_results(result_url)
+            except Exception as e:
+                logger.critical('FAILED: %s', e)
+                pprint(self.questions)
+                return
 
 
-# -----------------------------3533007347819314351001058393
-# Content - Disposition: form - data; name = "q16143576:13_:flagged"
-# 0
-# -----------------------------3533007347819314351001058393
-# Content - Disposition: form - data; name = "q16143576:13_:flagged"
-# 0
-# -----------------------------3533007347819314351001058393
-# Content - Disposition: form - data; name = "q16143576:13_:sequencecheck"
-# 1
-# -----------------------------3533007347819314351001058393
-# Content - Disposition: form - data; name = "q16143576:13_answer"
-# 4        - ## value of the input with answer
+def main():
+    p = Prober(TEST_QUESTIONS)
+    try:
+        p.run()
+    except KeyboardInterrupt:
+        pprint(p.questions)
 
 
-# -----------------------------3908362292114915363229560165
-# Content - Disposition: form - data; name = "q16143576:3_:sequencecheck"
-# 2  # miltucheck
-# -----------------------------3908362292114915363229560165
-# Content - Disposition: form - data; name = "q16143576:3_choice1"
-# 1     # checked
-# -----------------------------3908362292114915363229560165
-# Content - Disposition: form - data; name = "q16143576:12_choice0"
-# 0     # not checked
-
-    time.sleep(60)
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
