@@ -1,0 +1,282 @@
+{
+    "Какие процессы жизненного цикла используются в программном обеспечении HP ITSM?":
+    {
+        "result":
+        {
+            "Управление качеством": "0",
+            "Оперативное управление ИТ-сервисами": "1",
+            "Разработка и внедрение ИТ-сервисов": "1",
+            "Согласование задач бизнеса и ИТ": "1",
+            "Планирование и управление ИТ-сервисами": "1"
+        },
+        "iter": 30,
+        "multi": True,
+        "answers": ["Разработка и внедрение ИТ-сервисов", "Оперативное управление ИТ-сервисами", "Планирование и управление ИТ-сервисами", "Согласование задач бизнеса и ИТ", "Управление качеством"]
+    },
+    "Какие модули входят в состав пакета HP OpenView?":
+    {
+        "result":
+        {
+            "Service Desk": "1",
+            "Configuration management": "1",
+            "Identity management": "1",
+            "Asset management": "1",
+            "Performance alert": "0"
+        },
+        "iter": 29,
+        "multi": True,
+        "answers": ["Identity management", "Asset management", "Service Desk", "Performance alert", "Configuration management"]
+    },
+    "Какие аспекты ИТ-инфраструктуры использует IBM Tivoli?":
+    {
+        "result":
+        {
+            "Обучение пользователей": "0",
+            "Безопасность информационных систем": "1",
+            "Управление хранением данных": "1",
+            "Операционная поддержка": "1",
+            "Производительность и готовность": "1"
+        },
+        "iter": 27,
+        "multi": True,
+        "answers": ["Операционная поддержка", "Производительность и готовность", "Обучение пользователей", "Управление хранением данных", "Безопасность информационных систем"]
+    },
+    "Какие модули входят в состав IBM Tivoli?":
+    {
+        "result":
+        {
+            "IBM Tivoli Management Framework": "1",
+            "IBM Tivoli DataHouse": "0",
+            "IBM Tivoli Compressor": "0",
+            "IBM Tivoli Universal Agent": "1",
+            "IBM Tivoli Enterprise Data Warehouse": "1"
+        },
+        "iter": 13,
+        "multi": True,
+        "answers": ["IBM Tivoli Compressor", "IBM Tivoli Enterprise Data Warehouse", "IBM Tivoli Management Framework", "IBM Tivoli DataHouse", "IBM Tivoli Universal Agent"]
+    },
+    "Как называется программный пакет управления инфраструктурой компании НР?":
+    {
+        "result":
+        {
+            "Application Management": "0",
+            "Transtest": "0",
+            "Sierra HP": "0",
+            "BSM": "0",
+            "OpenView": "1"
+        },
+        "iter": 1,
+        "multi": False,
+        "answers": ["Transtest", "BSM", "Application Management", "Sierra HP", "OpenView"]
+    },
+    "В чём заключается мониторинг ИТ-инфраструктуры в соответствии с методологией IBM?":
+    {
+        "result":
+        {
+            "Ведение базы по конфигурации системы": "1",
+            "Обновление антивирусных баз": "0",
+            "Слежение за доступностью системы": "1",
+            "Разрешение проблем": "1",
+            "Измерение производительности": "1"
+        },
+        "iter": 15,
+        "multi": True,
+        "answers": ["Обновление антивирусных баз", "Измерение производительности", "Слежение за доступностью системы", "Ведение базы по конфигурации системы", "Разрешение проблем"]
+    },
+    "Вам необходимо организовать централизованный учёт лицензий. Как программный продукт IBM поможет в этом?":
+    {
+        "result":
+        {
+            "License Compliance Manager": "1",
+            "Service Level Advisor": "0",
+            "Intelligent Orchestrator": "0",
+            "Composite Application Manager": "0",
+            "Storage Process Manager": "0"
+        },
+        "iter": 2,
+        "multi": False,
+        "answers": ["Composite Application Manager", "Storage Process Manager", "Service Level Advisor", "License Compliance Manager", "Intelligent Orchestrator"]
+    },
+    "Вам необходимо создать отчёт о работе сети. Какой продукт НР вы будете использовать?":
+    {
+        "result":
+        {
+            "HP OpenView Reporter": "1",
+            "DisignJet": "0",
+            "HP Network Node Manager": "0",
+            "HP Signum": "0",
+            "Deskjet": "0"
+        },
+        "iter": 1,
+        "multi": False,
+        "answers": ["HP Signum", "Deskjet", "DisignJet", "HP Network Node Manager", "HP OpenView Reporter"]
+    },
+    "Где хранится вся информация об инфраструктуре в Tivoli?":
+    {
+        "result":
+        {
+            "В xml-файле tsystem.xml": "0",
+            "В отдельных файлах": "0",
+            "Ничего из выше перечисленного": "0",
+            "В одном файле system.dat": "0",
+            "В центральном репозитории": "1"
+        },
+        "iter": 2,
+        "multi": False,
+        "answers": ["Ничего из выше перечисленного", "В xml-файле tsystem.xml", "В одном файле system.dat", "В центральном репозитории", "В отдельных файлах"]
+    },
+    "Какие процессы автоматизирует методология ITPM?":
+    {
+        "result":
+        {
+            "Сертификация пользователей": "0",
+            "Управление ИТ-инфраструктурой": "1",
+            "Поддержка ИТ-сервисов": "1",
+            "Взаимодействие с клиентами": "1",
+            "Обеспечение ИТ-сервисами": "1"
+        },
+        "iter": 23,
+        "multi": True,
+        "answers": ["Обеспечение ИТ-сервисами", "Сертификация пользователей", "Поддержка ИТ-сервисов", "Взаимодействие с клиентами", "Управление ИТ-инфраструктурой"]
+    },
+    "Какой модуль НР используется для управления ИТ-ресурсами?":
+    {
+        "result":
+        {
+            "HP Network monitor": "0",
+            "HP Controller": "0",
+            "HP OpenView Comliance Manager": "1",
+            "Kerberos": "0",
+            "OpenSet": "0"
+        },
+        "iter": 4,
+        "multi": False,
+        "answers": ["Kerberos", "HP Controller", "HP OpenView Comliance Manager", "OpenSet", "HP Network monitor"]
+    },
+    "Как называется модель информационных процессов компании IBM?":
+    {
+        "result":
+        {
+            "ITSET": "0",
+            "IBM GOIT": "0",
+            "GHOST": "0",
+            "ITIL": "0",
+            "ITPM": "1"
+        },
+        "iter": 2,
+        "multi": False,
+        "answers": ["GHOST", "ITIL", "ITSET", "ITPM", "IBM GOIT"]
+    },
+    "Вам необходимо создать информационную панель ИТ-сервиса. Какое средство вы будете использовать?":
+    {
+        "result":
+        {
+            "HP Reporting": "0",
+            "HP TreeView": "0",
+            "HP Service Trial": "0",
+            "OpenView Dashboard": "1",
+            "HP Design": "0"
+        },
+        "iter": 8,
+        "multi": False,
+        "answers": ["HP Reporting", "OpenView Dashboard", "HP Service Trial", "HP TreeView", "HP Design"]
+    },
+    "Какими свойствами обладает модуль Tivoli Management Framework?":
+    {
+        "result":
+        {
+            "Кросплатформенность системы управления": "1",
+            "Интерфейс на всех языках": "0",
+            "Стандартные интерфейсы": "1",
+            "Тесная интеграция компонентов Tivoli": "1",
+            "Средства для расширения функциональности": "1"
+        },
+        "iter": 27,
+        "multi": True,
+        "answers": ["Средства для расширения функциональности", "Кросплатформенность системы управления", "Интерфейс на всех языках", "Тесная интеграция компонентов Tivoli", "Стандартные интерфейсы"]
+    },
+    "Как называется термин «управление изменениями»?":
+    {
+        "result":
+        {
+            "Configuration management": "0",
+            "Service level management": "0",
+            "Problem management": "0",
+            "Change management": "1",
+            "Operation management": "0"
+        },
+        "iter": 1,
+        "multi": False,
+        "answers": ["Operation management", "Configuration management", "Problem management", "Service level management", "Change management"]
+    },
+    "Какие внешние механизмы использует HP OpenView для аутентификации?":
+    {
+        "result":
+        {
+            "Tripple": "0",
+            "Policy": "0",
+            "Radius": "1",
+            "Kerberos": "1",
+            "IP Access": "0"
+        },
+        "iter": 17,
+        "multi": True,
+        "answers": ["Kerberos", "Tripple", "Policy", "IP Access", "Radius"]
+    },
+    "Как называется решение HP для управления службой технической поддержки?":
+    {
+        "result":
+        {
+            "Tivoli Review": "0",
+            "TrueView": "0",
+            "OpenView Service Desk": "1",
+            "Transcender Desk": "0",
+            "OpenDesk": "0"
+        },
+        "iter": 1,
+        "multi": False,
+        "answers": ["Transcender Desk", "OpenDesk", "TrueView", "Tivoli Review", "OpenView Service Desk"]
+    },
+    "Вам необходимо собирать информацию об инфраструктуре от источников разных типов. Какой модуль Tivoli следует использовать?":
+    {
+        "result":
+        {
+            "IBM Agrigator": "0",
+            "Tivoli enterprise portal": "0",
+            "IBM Tivoli Universal Agent": "1",
+            "Tivoli Extender": "0",
+            "IBM Tivoli suppressor": "0"
+        },
+        "iter": 2,
+        "multi": False,
+        "answers": ["IBM Tivoli suppressor", "IBM Agrigator", "Tivoli Extender", "IBM Tivoli Universal Agent", "Tivoli enterprise portal"]
+    },
+    "Как называется решение компании Microsoft для управления ИТ-инфраструктурой?":
+    {
+        "result":
+        {
+            "Microsoft Windows": "0",
+            "Windows Explorer": "0",
+            "Microsoft Exchange Server": "0",
+            "Всё выше перечисленное": "0",
+            "Microsoft Solutions for Management - MSC": "1"
+        },
+        "iter": 16,
+        "multi": False,
+        "answers": ["Microsoft Solutions for Management - MSC", "Microsoft Exchange Server", "Windows Explorer", "Всё выше перечисленное", "Microsoft Windows"]
+    },
+    "Как называется программный продукт компании IBM для управления ИТ-инфраструктурой?":
+    {
+        "result":
+        {
+            "IBM Percutor": "0",
+            "OSCAR": "0",
+            "RedHut Service": "0",
+            "Parallels": "0",
+            "Tivoli": "1"
+        },
+        "iter": 1,
+        "multi": False,
+        "answers": ["RedHut Service", "IBM Percutor", "Parallels", "OSCAR", "Tivoli"]
+    }
+}
