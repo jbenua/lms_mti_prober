@@ -1,28 +1,30 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-import time
-import requests
 import logging
+import requests
+import time
+
 from pyquery import PyQuery as pq
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 from collections import OrderedDict
 
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('mti.py')
 
-ID = '1824'
-D_ID = '2455'
+
+ID = ''
+D_ID = ''
 
 LOGIN_URL = 'https://lms.mti.edu.ru/local/login.php'
-DISCIPLINE_URL = \
+DISCIPLINE_URL = (
     'https://lms.mti.edu.ru/course/view.php?id={ID}&disciplineid={D_ID}'
+)
 ATTEMPTS_URL = 'https://lms.mti.edu.ru/mod/quiz/view.php'
 START_URL = 'https://lms.mti.edu.ru/mod/quiz/startattempt.php'
 POST_ANSWERS_URL = 'https://lms.mti.edu.ru/mod/quiz/processattempt.php'
 
 
-LOGIN = 'harumm.scarumm@gmail.com'
-PSWD = 'oscopes1'
+LOGIN = ''
+PSWD = ''
 
 TEST_QUESTIONS = {}
 
@@ -33,7 +35,8 @@ def make_attempt(q):
         attempt = q['result']
     else:
         variant = bin(q['iter'])[2:].zfill(
-            len(q['answers']))
+            len(q['answers'])
+        )
         for (item, value) in zip(q['answers'], variant):
             attempt[item] = value
     return attempt
@@ -53,19 +56,26 @@ class Prober:
             if self.questions[q]['result'] is None:
                 if q in err_q:
                     if not self.questions[q]['multi']:
-                        self.questions[q]['iter'] = self.questions[q]['iter'] << 1
+                        self.questions[q]['iter'] = (
+                            self.questions[q]['iter'] << 1
+                        )
                     else:
                         self.questions[q]['iter'] += 1
 
-                    if len(self.questions[q]['answers']) < len(
-                            bin(self.questions[q]['iter'])[2:]):
+                    if (
+                        len(self.questions[q]['answers'])
+                        < len(bin(self.questions[q]['iter'])[2:])
+                    ):
                         self.questions[q]['iter'] = 1
                 elif not self.questions[q]['result']:
                     attempt = {}
                     variant = bin(self.questions[q]['iter'])[2:].zfill(
-                        len(self.questions[q]['answers']))
+                        len(self.questions[q]['answers'])
+                    )
                     for (item, value) in zip(
-                            self.questions[q]['answers'], variant):
+                            self.questions[q]['answers'],
+                            variant
+                    ):
                         attempt[item] = value
                     self.questions[q]['result'] = attempt
 
@@ -79,14 +89,12 @@ class Prober:
                 'AppleWebKit/537.36 (KHTML, like Gecko) '
                 'Chrome/63.0.3239.132 Safari/537.36')})
 
-        r = s.post(LOGIN_URL, data={'username': LOGIN,
-                                    'password': PSWD})
+        r = s.post(LOGIN_URL, data={'username': LOGIN, 'password': PSWD})
 
         while r.status_code != requests.codes.ok:
             logger.error('Failed to auth, retry in 5 secs...')
             time.sleep(5)
-            r = s.post(LOGIN_URL, data={'username': LOGIN,
-                                        'password': PSWD})
+            r = s.post(LOGIN_URL, data={'username': LOGIN, 'password': PSWD})
         logger.info('Auth ok')
         self.session = s
 
@@ -95,8 +103,7 @@ class Prober:
         while r.status_code != requests.codes.ok:
             logger.error('Failed to get discipline, retry in 5 secs...')
             time.sleep(5)
-            r = self.session.get(DISCIPLINE_URL.format(ID=ID,
-                                                       D_ID=D_ID))
+            r = self.session.get(DISCIPLINE_URL.format(ID=ID, D_ID=D_ID))
         d = pq(r.text)
         return pq(d('a.training')[-2]).attr('href')
 
@@ -108,8 +115,11 @@ class Prober:
             r = self.session.get(url)
         data = {}
         for i in pq(pq(r.text)(
-                'div.singlebutton > form[method="post"] '
-                '> div > input[type="hidden"]')):
+            'div.singlebutton '
+            '> form[method="post"] '
+            '> div '
+            '> input[type="hidden"]'
+        )):
             p = pq(i)
             data[p.attr('name')] = p.attr('value')
         return data
@@ -123,7 +133,10 @@ class Prober:
 
         data = {}
         for i in pq(r.text)(
-                'form[method="post"] > div > input[type="hidden"]'):
+            'form[method="post"] '
+            '> div '
+            '> input[type="hidden"]'
+        ):
             p = pq(i)
             data[p.attr('name')] = p.attr('value')
         return data
@@ -184,8 +197,9 @@ class Prober:
                         data.append(
                             (i_name, pa('input[type!="hidden"]').val()))
 
-        hidden = pq(full_text)('form#responseform > div'
-                               ).children('input[type="hidden"]')
+        hidden = pq(full_text)(
+            'form#responseform > div'
+        ).children('input[type="hidden"]')
         for h in hidden:
             ph = pq(h)
             data.append((ph.attr('name'), ph.attr('value')))
@@ -294,7 +308,6 @@ class Prober:
         #         self.questions[q]['result'] = attempt
 
     def run(self):
-
         first = True
         logger.info("%s %s", all([self.questions[q]['result'] is not None
                                   for q in self.questions]), first)
